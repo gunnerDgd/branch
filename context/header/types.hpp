@@ -1,10 +1,12 @@
 #pragma once
 #include <iostream>
 
+#define BRANCH_PRESERVE __attribute__((always_inline))
+
 namespace branch  {
 namespace context {
 
-    class alignas(16) execution_context
+    class alignas(16) execution_context // 64 Byte.
     {
     public:
         union
@@ -19,7 +21,7 @@ namespace context {
         };
     };
 
-    class alignas(16) execution_stack
+    class alignas(16) execution_stack // 16 Byte
     {
     public:
         union
@@ -29,7 +31,7 @@ namespace context {
         };
     };
 
-    class alignas(16) trace
+    class alignas(16) trace // 32 Byte
     {
     public:
         union
@@ -37,6 +39,13 @@ namespace context {
             struct { uint64_t rbp, rsp, rip; };
             uint64_t          caller_block[3];
         };
+    };
+
+    struct context_entity
+    {
+        execution_context context_exec_ctx ; // 64
+        execution_stack   context_exec_stk ; // 16
+        trace             context_exec_prev; // 32
     };
 
 }

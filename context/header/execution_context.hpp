@@ -9,7 +9,7 @@ extern "C"
 namespace branch  {
 namespace context {
 
-    void __attribute__((always_inline)) store_context(branch::context::execution_context& exec_ctx) { store_cpu_context(exec_ctx); }
-    void __attribute__((always_inline)) load_context (branch::context::execution_context& exec_ctx) { load_cpu_context (exec_ctx); }
+    void BRANCH_PRESERVE store_context(branch::context::execution_context& exec_ctx) { store_cpu_context(exec_ctx); }
+    void BRANCH_PRESERVE load_context (branch::context::execution_context& exec_ctx) { load_cpu_context (exec_ctx); }
 }
 }

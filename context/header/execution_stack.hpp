@@ -9,8 +9,8 @@ extern "C"
 namespace branch  {
 namespace context {
 
-    void __attribute__((always_inline)) store_stack(branch::context::execution_stack& exec_stk) { store_stack_context(exec_stk); }
-    void __attribute__((always_inline)) load_stack (branch::context::execution_stack& exec_stk) { load_stack_context (exec_stk); }
+    void BRANCH_PRESERVE store_stack(branch::context::execution_stack& exec_stk) { store_stack_context(exec_stk); }
+    void BRANCH_PRESERVE load_stack (branch::context::execution_stack& exec_stk) { load_stack_context (exec_stk); }
 
 }
 }
