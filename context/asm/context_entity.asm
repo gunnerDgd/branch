@@ -17,22 +17,29 @@ current_context:
     add  rdi, 0x40
     call store_stack_context ; RDI Has Stack Entity Object.
 
+    sub  rdi, 0x40           ; Restore RDI Value.
     ret
 
 switch_context:
-    mov  r8, rdi          ; Previous Context Entity
-    mov  r9, rsi          ; Next Context Entity
+; Current State
+; RDI : prev, RSI : next
     call current_context  ; RDI : Previous Context Entity
+    mov  rdi, rsi         ; Previous Context Entity is Useless.
     
-    lea  rdi, [rsi]       ; RSI : Next Context Entity
+    mov  r10, rdi         ; Back up RDI Register (Pointer of the Next Context Entity)
     call load_cpu_context ; RDI : Next Context Entity (Prev Context Entity Deleted.)
     
-    mov  rdi, r8          ; R8  : Next Context's RDI Register Context.
-    lea  rdi, [r9 + 0x40] ; RDI : Next Context's Stack Frame
-    call load_stack_context
-
-    mov  rdi, r8                      ; RDI Restore
-    mov  r8 , qword[r9 + 0x50 + 0x20] ; Get RIP Address
-
-    call r8
+    mov  r11, rdi         ; Back up Next Context's RDI Register.
+    mov  rdi, r10         ; R10  : Next Context's RDI Register Pointer.
     
+                          ; R10 : Pointer Of the Next Context Entity.
+                          ; R11 : Next Context's RDI Register
+                          ; R12 : Next Context's RIP Register
+
+    add  rdi, 0x40
+    call load_stack_context
+    
+    mov  r12, qword[rdi + 0x30]
+    mov  rdi, r11
+
+    jmp  r12
