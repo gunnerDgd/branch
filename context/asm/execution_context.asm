@@ -29,7 +29,7 @@ store_cpu_context:
     mov qword[rdi + 0x30], rax
 
     pop rax
-    retq
+    ret
 
 
 ; void load_cpu_context(branch::context::execution_context&)
@@ -51,5 +51,5 @@ load_cpu_context:
     mov rdi, qword[rsp]
 
     add rsp, 0x10
-    retq
+    ret
 

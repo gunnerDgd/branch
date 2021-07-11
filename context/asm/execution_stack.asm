@@ -19,7 +19,7 @@ store_stack_context:
     mov  qword[rdi + 0x08], rax
 
     pop  rax
-    retq
+    ret
 
 ; void load_stack_context(branch::context::execution_stack&)
 
@@ -28,4 +28,4 @@ load_stack_context:
     mov rbp, qword[rdi]
     mov rsp, qword[rdi + 0x08]
 
-    retq
+    ret

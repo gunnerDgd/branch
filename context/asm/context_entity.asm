@@ -12,18 +12,12 @@ section .text
 current_context:
     ; Current
     ; RDI : branch::context::context_entity
-    push rax
-    lea  rax, [rdi]
-
-    mov  rdi, rax
     call store_cpu_context   ; RDI Has Entity Object.
 
-    lea  rax, [rdi + 0x40]
-    mov  rdi, rax
+    add  rdi, 0x40
     call store_stack_context ; RDI Has Stack Entity Object.
 
-    pop rax
-    retq
+    ret
 
 switch_context:
     mov  r8, rdi          ; Previous Context Entity
