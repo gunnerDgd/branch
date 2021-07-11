@@ -11,14 +11,14 @@ section .text
 
 store_stack_context:
     push rax
-    mov  qword[rdi]       , rbp
+    
+    mov  rax       , qword[rbp]
+    mov  qword[rdi], rax
 
-    mov  rax, rsp
-    add  rax, 0x10
-    
+    add  rax              , 0x10
     mov  qword[rdi + 0x08], rax
+
     pop  rax
-    
     retq
 
 ; void load_stack_context(branch::context::execution_stack&)

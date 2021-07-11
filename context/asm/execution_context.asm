@@ -11,6 +11,7 @@ section .text
 ; By System V Function Convention, RDI Register will be used to store parameter.
 
 store_cpu_context:
+    push rax
 
 ; Stores Generic Purposed Register.
 
@@ -23,7 +24,11 @@ store_cpu_context:
 
     mov qword[rdi + 0x20], rsi
     mov qword[rdi + 0x28], rdi
+    
+    mov rax              , qword[rbp + 0x08]
+    mov qword[rdi + 0x30], rax
 
+    pop rax
     retq
 
 

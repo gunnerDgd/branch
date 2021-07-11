@@ -1,42 +1,34 @@
 %include "execution_context.asm"
 %include "execution_stack.asm"
-%include "trace_context.asm"
 
-; void save_context(branch::context::context_entity&)
-global save_context:function
+; void current_context(branch::context::context_entity&)
+global current_context:function
 
 ; void switch_context(branch::context::context_entity& prev, branch::context::context_entity& next)
 ; prev : rdi, next : rsi
 global switch_context:function
 
 section .text
-save_context:
-    push rdi
+current_context:
+    ; Current
+    ; RDI : branch::context::context_entity
     push rax
-
     lea  rax, [rdi]
+
     mov  rdi, rax
-    call store_cpu_context
+    call store_cpu_context   ; RDI Has Entity Object.
 
-    lea  rax, [rdi + 0x20]
+    lea  rax, [rdi + 0x40]
     mov  rdi, rax
-    call store_stack_context
+    call store_stack_context ; RDI Has Stack Entity Object.
 
-    lea  rax, [rdi + 0x30]
-    mov  rdi, rax
-
-    call trace_caller_rbp
-    call trace_caller_rsp
-    call trace_caller_rip
-
-    pop  rax
-    pop  rdi
+    pop rax
     retq
 
 switch_context:
     mov  r8, rdi          ; Previous Context Entity
     mov  r9, rsi          ; Next Context Entity
-    call save_context     ; RDI : Previous Context Entity
+    call current_context  ; RDI : Previous Context Entity
     
     lea  rdi, [rsi]       ; RSI : Next Context Entity
     call load_cpu_context ; RDI : Next Context Entity (Prev Context Entity Deleted.)

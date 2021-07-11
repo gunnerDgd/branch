@@ -26,26 +26,15 @@ namespace context {
     public:
         union
         {
-            struct { uint64_t rbp, rsp; };
-            uint64_t    stack_register[2];
-        };
-    };
-
-    class alignas(16) trace // 32 Byte
-    {
-    public:
-        union
-        {
-            struct { uint64_t rbp, rsp, rip; };
-            uint64_t          caller_block[3];
+            struct { uint64_t rbp, rsp; }      ;
+            uint64_t          stack_register[2];
         };
     };
 
     struct context_entity
     {
-        execution_context context_exec_ctx ; // 64
-        execution_stack   context_exec_stk ; // 16
-        trace             context_exec_prev; // 32
+        execution_context context; // 64
+        execution_stack   stack  ; // 16
     };
 
 }
