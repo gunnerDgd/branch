@@ -13,7 +13,8 @@ namespace context {
     template <typename R, typename... Args>
     void switch_to(branch::context::context_entity& prev, R(*next)(Args...), Args... next_args);
     void switch_to(branch::context::context_entity& prev, branch::context::context_entity& next) { switch_context (prev, next); }
-    void current  (branch::context::context_entity& curr)                                        { current_context(curr);       }
+    
+    void current  (branch::context::context_entity& curr) { current_context(curr); }
 
 }
 }
