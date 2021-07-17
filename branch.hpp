@@ -1,48 +1,36 @@
-#include <branch/context/execution_context.hpp>
-#include <branch/context/execution_stack.hpp>
-#include <branch/context/trace_context.hpp>
-
+#include <branch/context/header/context.hpp>
 #include <functional>
-#include <future>
+#include <tuple>
 
 namespace branch {
 
-    template <typename R>
-    class branch<R(void)>
+    enum  state
     {
-    public:
-        branch                     (std::function<R(void)> br_func);
-        std::promise<R> operator() ();
-
-    private:
-        std::function<R(void)> branch_execution;
-        std::promise<R>        branch
+        standby,
+        running,
+        ended
     };
-
 
     template <typename R, typename... Args>
-    class branch<R(Args...)>
+    class branch : public context_entity
     {
     public:
-        branch                     (std::function<R(Args...)> br_func,
-                                    Args...                   br_args);
+        branch    (std::function<R(Args...)> br_exec, Args... br_args);
+        void start()
+        {
+            if (branch_state == branch::state::standby)
+                std::apply(branch_executor, branch_argument);
+        }
 
-        std::promise<R> operator() ();
-
-    private:
-        std::function<R(Args...)> branch_execution;
-        std::tuple<Args...>       branch_argument ;
+    protected:
+        std::tuple<Args...>       branch_argument     ;
+        std::function<R(Args...)> branch_executor     ;
+        branch::state             branch_state        ; 
     };
-
 }
 
-template <typename R>
-branch::branch::branch(std::function<R(void)> br_func)
-    : branch_execution(br_func) { }
-
-template <typename R>
-std::promise<R> branch::branch::operator() ()
-{
-    std::promise<R> branch_return_value;
-
-}
+template <typename R, typename... Args>
+branch::branch::branch(std::function<R(Args...)> br_exec, Args... br_args)
+    : branch_argument(std::make_tuple(br_args...)),
+      branch_executor(branch_executor)            ,
+      branch_state   (branch::state::standby)     { }

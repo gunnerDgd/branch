@@ -23,6 +23,7 @@ current_context:
 switch_context:
 ; Current State
 ; RDI : prev, RSI : next
+
     call current_context  ; RDI : Previous Context Entity
     mov  rdi, rsi         ; Previous Context Entity is Useless.
     
@@ -36,10 +37,11 @@ switch_context:
                           ; R11 : Next Context's RDI Register
                           ; R12 : Next Context's RIP Register
 
-    add  rdi, 0x40
-    call load_stack_context
-    
     mov  r12, qword[rdi + 0x30]
     mov  rdi, r11
+
+    add  rdi, 0x40
+    mov  rbp, qword[rdi]
+    mov  rsp, qword[rdi + 0x08]
 
     jmp  r12

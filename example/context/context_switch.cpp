@@ -20,11 +20,13 @@ void branch_test_1()
     std::cout << "Branch Test #1\n";
     branch::context::switch_to(branch_1, branch_test_2);
     std::cout << "Branch Test #1(2)\n";
-    branch::context::switch_to(branch_1, main_branch);
+    branch::context::switch_to(branch_1, branch_2);
 }
 
 void branch_test_2()
 {
     std::cout << "Branch Test #2\n";
     branch::context::switch_to(branch_2, branch_1);
+    std::cout << "Branch Test #2(2)\n";
+    branch::context::switch_to(branch_2, main_branch);
 }

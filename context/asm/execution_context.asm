@@ -10,7 +10,7 @@ section .text
 ; By System V Function Convention, RDI Register will be used to store parameter.
 
 store_cpu_context:
-    sub rsp, 0x10                           ; 16 - Byte Alignment.
+    sub rsp, 0x08                           ; 16 - Byte Alignment.
                                             ; Stores Generic Purposed Register.
 
     mov qword[rdi]       , rax
@@ -27,7 +27,7 @@ store_cpu_context:
     mov qword[rdi + 0x30], rax
     mov rax              , [rsp]
 
-    add rsp, 0x10                           ; Deallocate Temporal Memory.
+    add rsp, 0x08                           ; Deallocate Temporal Memory.
     ret
 
 
@@ -36,6 +36,7 @@ store_cpu_context:
 
 load_cpu_context:
 ; Loads Generic Purposed Register.
+    sub rsp, 0x08
 
     mov rax, qword[rdi]
     mov rbx, qword[rdi + 0x08]
@@ -46,5 +47,6 @@ load_cpu_context:
     mov r10, qword[rdi + 0x28]
     mov rdi, r10
 
+    add rsp, 0x08
     ret
 

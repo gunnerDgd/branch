@@ -6,6 +6,9 @@
 namespace branch  {
 namespace context {
 
+    class alignas(16) sse_register { public: uint64_t simd_register[2]; };
+    class alignas(32) avx_register { public: uint64_t simd_register[4]; };
+
     class alignas(16) execution_context // 64 Byte.
     {
     public:
@@ -13,8 +16,8 @@ namespace context {
         {
             struct
             {
-                uint64_t rax, rbx, rcx, rdx,
-                         rsi, rdi, rip     ;
+                uint64_t rax, rbx, rcx, rdx  ,
+                         rsi, rdi, rip       ;                
             };
 
             uint64_t     register_block [7];

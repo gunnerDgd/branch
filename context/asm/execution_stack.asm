@@ -8,7 +8,6 @@ global trace_caller_stack:function
 section .text
 
 ; void store_stack_context(branch::context::execution_stack&)
-
 store_stack_context:
     push rax
     
@@ -19,13 +18,4 @@ store_stack_context:
     mov  qword[rdi + 0x08], rax
 
     pop  rax
-    ret
-
-; void load_stack_context(branch::context::execution_stack&)
-
-
-load_stack_context:
-    mov rbp, qword[rdi]
-    mov rsp, qword[rdi + 0x08]
-
     ret
