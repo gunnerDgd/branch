@@ -1,15 +1,18 @@
 %include "execution_context.asm"
 %include "execution_stack.asm"
 
-; void current_context(branch::context::context_entity&)
-global current_context:function
+; void context_current(branch::context::context_entity&)
+global context_current:function
 
-; void switch_context(branch::context::context_entity& prev, branch::context::context_entity& next)
+; void context_switch (branch::context::context_entity& prev, branch::context::context_entity& next)
 ; prev : rdi, next : rsi
-global switch_context:function
+global context_switch:function
+
+section .data
+    context_entity_pointer:      dq 0x00
 
 section .text
-current_context:
+context_current:
     ; Current
     ; RDI : branch::context::context_entity
     call store_cpu_context   ; RDI Has Entity Object.
@@ -20,28 +23,19 @@ current_context:
     sub  rdi, 0x40           ; Restore RDI Value.
     ret
 
-switch_context:
+context_switch:
 ; Current State
 ; RDI : prev, RSI : next
-
-    call current_context  ; RDI : Previous Context Entity
-    mov  rdi, rsi         ; Previous Context Entity is Useless.
+    call current_context                                ; RDI : Previous Context Entity
+    mov  rdi, rsi                                       ; Previous Context Entity is Useless.
     
-    mov  r10, rdi         ; Back up RDI Register (Pointer of the Next Context Entity)
-    call load_cpu_context ; RDI : Next Context Entity (Prev Context Entity Deleted.)
+    mov  context_entity_pointer, rdi                    ; Back up RDI Register (Pointer of the Next Context Entity)
+    call load_cpu_context                               ; RDI : Next Context Entity (Prev Context Entity Deleted.)
     
-    mov  r11, rdi         ; Back up Next Context's RDI Register.
-    mov  rdi, r10         ; R10  : Next Context's RDI Register Pointer.
+    xchg context_entity_pointer, rdi                    ; Back up Next Context's RDI Register.
+    add  rdi                   , 0x40
     
-                          ; R10 : Pointer Of the Next Context Entity.
-                          ; R11 : Next Context's RDI Register
-                          ; R12 : Next Context's RIP Register
+    call context_load_stack
+    xchg context_entity_pointer, rdi
 
-    mov  r12, qword[rdi + 0x30]
-    mov  rdi, r11
-
-    add  rdi, 0x40
-    mov  rbp, qword[rdi]
-    mov  rsp, qword[rdi + 0x08]
-
-    jmp  r12
+    jmp  context_entity_pointer

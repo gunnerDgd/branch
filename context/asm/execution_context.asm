@@ -6,13 +6,12 @@ global load_cpu_context:function
 
 section .text
 
-; void store_cpu_context(branch::context::execution_context&)
+; void context_store_cpu(branch::context::execution_context&)
 ; By System V Function Convention, RDI Register will be used to store parameter.
 
-store_cpu_context:
-    sub rsp, 0x08                           ; 16 - Byte Alignment.
-                                            ; Stores Generic Purposed Register.
-
+context_store_cpu:
+    sub rsp              , 0x08
+    
     mov qword[rdi]       , rax
     mov qword[rdi + 0x08], rbx
     mov qword[rdi + 0x10], rcx
@@ -27,14 +26,14 @@ store_cpu_context:
     mov qword[rdi + 0x30], rax
     mov rax              , [rsp]
 
-    add rsp, 0x08                           ; Deallocate Temporal Memory.
+    add rsp              , 0x08
     ret
 
 
-; void load_cpu_context(branch::context::execution_context&)
+; void context_load_cpu(branch::context::execution_context&)
 ; By System V Function Convention, RDI Register will be used to store parameter.
 
-load_cpu_context:
+context_load_cpu:
 ; Loads Generic Purposed Register.
     sub rsp, 0x08
 
@@ -43,10 +42,14 @@ load_cpu_context:
     mov rcx, qword[rdi + 0x10]
     mov rdx, qword[rdi + 0x18]
 
-    mov rsi, qword[rdi + 0x20]
-    mov r10, qword[rdi + 0x28]
-    mov rdi, r10
+    mov rsi       , qword[rdi + 0x20]
+    mov qword[rsp], rax
+    
+    mov rax       , rdi
+    mov rdi       , qword[rax + 0x28]
 
-    add rsp, 0x08
+    mov rax       , qword[rsp]
+    add rsp       , 0x08
+    
     ret
 
