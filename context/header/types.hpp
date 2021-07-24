@@ -34,6 +34,12 @@ namespace context {
         cpu_register cpu_context  ; // 64
         frame        stack_context; // 16
     };
+
+    class execution_wrapper : public context_entity
+    {
+    public: 
+        virtual void execute() = 0;
+    };
     
 }
 }

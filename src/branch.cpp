@@ -1,2 +1,2 @@
-#include <branch/branch_types.hpp>
-extern branch::context::execution_wrapper* current_context;
+#include <branch/branch.hpp>
+extern thread_local branch::context::context_entity* current_context;

@@ -1,4 +1,4 @@
-#include <branch/branch.hpp>
+#include <branch/context/header/types.hpp>
 #include <tuple>
 
 extern "C"
@@ -19,25 +19,25 @@ namespace context  {
 namespace internal {
     void switch_to (branch::context::context_entity& prev, branch::context::context_entity& next);
     template <typename R, typename... Args>
-    void execute_to(branch::context::context_entity& prev, branch::branch<R(Args...)>     & next);
+    void execute_to(branch::context::context_entity& prev, branch::execution_wrapper      & next);
 }
 
     void switch_to (branch::context::context_entity& prev, branch::context::context_entity& next);
     template <typename R, typename... Args>
-    void execute_to(branch::context::context_entity& prev, branch::branch<R(Args...)>     & next);
+    void execute_to(branch::context::context_entity& prev, branch::execution_wrapper      & next);
 }
 }
 
 template <typename R, typename... Args>
-void branch::context::internal::execute_to(branch::context::context_entity& prev, branch::branch<R(Args...)>& next)
+void branch::context::internal::execute_to(branch::context::context_entity& prev, branch::execution_wrapper& next)
 {
     context_store_cpu (prev);
     context_load_stack(next);
-    branch::branch<R(Args...)>::launch(next);
+    next          .execute();
 }
 
 template <typename R, typename... Args>
-void branch::context          ::execute_to(branch::context::context_entity& prev, branch::branch<R(Args...)>& next)
+void branch::context          ::execute_to(branch::context::context_entity& prev, branch:execution_wrapper& next)
 {
     volatile context_entity* instack_prev = &prev;
     volatile context_entity* instack_next = &next;
