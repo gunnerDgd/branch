@@ -1,0 +1,3 @@
+[submodule "buildtool-nasm"]
+	path = buildtool-nasm
+	url = https://github.com/netwide-assembler/nasm.git

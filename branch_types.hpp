@@ -1,31 +1,29 @@
 #include <branch/context/header/types.hpp>
-#include <functional>
 #include <tuple>
+#include <any>
 
-namespace branch {
-    static thread_local context::context_entity* current_context;
-
-    template <typename R>
+namespace branch     {
+    enum  state_code { standby, running, finished };
+    
+    template <typename R, typename... Args>
     class branch : public context::context_entity
     {
     public:
-        template <typename Fn, typename... Args>
-        branch(Fn& branch_exec, Args... branch_argument)
-            : branch_parent(current_context)
-        {
-            current_context = this;   
-            std::apply       (branch_exec, std::make_tuple(branch_argument...));
-        }
+        using  executor_t      = R(*)(branch<R(Args...)>, Args...)      ;
+        using  executor_args_t = std::tuple<branch<R(Args...)>, Args...>;
+    public:
+        branch(executor_t branch_exec, Args... branch_args)
+            : branch_executor(branch_exec)                          ,
+              branch_state   (state_code::standby)                  ,
+              branch_args    (std::make_tuple(*this, branch_args...)) { }
 
-        template <typename U>
-        branch(branch<U>& branch_convert)
-            : branch_parent(branch_convert.branch_parent)
-        {
-            
-        }
+        friend void launch    (branch<R(Args...)>& next)   { std::apply(branch_executor, branch_argument); }
+        template <typename Tr, typename... Targs>
+        void        operator()(branch<Tr(Targs...)>& prev) { context::execute_to(prev, *this); }
 
-    private:
-        context::context_entity* branch_parent      ;
-        R                        branch_return_value;
+    protected:
+        executor_t      branch_executor;
+        executor_args_t branch_argument;
+        state_code      branch_state   ;
     };
 }
