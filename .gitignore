@@ -1,4 +1,2 @@
-buildtool/
 example/context/*.o
 example/context/*.out
-context/nasm
