@@ -1,27 +1,61 @@
-#include <branch/context/header/types.hpp>
+#include <branch/branch.hpp>
 #include <tuple>
 
 extern "C"
 {
-    void switch_context (branch::context::context_entity&, branch::context::context_entity&);
-    void current_context(branch::context::context_entity&);
+    void context_store_cpu  (branch::context::cpu_register& curr);
+    void context_load_cpu   (branch::context::cpu_register& curr);
+
+    void context_store_stack(branch::context::frame& curr);
+    void context_load_stack (branch::context::frame& curr);
+
+    void context_switch_to  (branch::context::context_entity& next);
 }
 
-namespace branch  {
-namespace context {
+namespace branch   {
+namespace context  {
 
-    template <typename R, typename... Args>
-    void switch_to(branch::context::context_entity& prev, R(*next)(Args...), Args... next_args);
-    void switch_to(branch::context::context_entity& prev, branch::context::context_entity& next) { switch_context (prev, next); }
-    
-    void current  (branch::context::context_entity& curr) { current_context(curr); }
+namespace internal {
+    void switch_to (branch::context::context_entity& prev, branch::context::context_entity   & next);
+    void execute_to(branch::context::context_entity& prev, branch::context::execution_wrapper& next);
+}
 
+    void switch_to (branch::context::context_entity& prev, branch::context::context_entity   & next);
+    void execute_to(branch::context::context_entity& prev, branch::context::execution_wrapper& next);
 }
 }
 
-template <typename R, typename... Args>
-void branch::context::switch_to(branch::context::context_entity& prev, R(*next)(Args...), Args... next_args)
+void branch::context::internal::execute_to(branch::context::context_entity& prev, branch::context::execution_wrapper& next)
 {
-    current_context(prev);
-    std::apply     (next, std::make_tuple(next_args...));
+    context_store_cpu (prev);
+    
+    context_load_stack(next);
+    next      .execute()    ;
+}
+
+void branch::context          ::execute_to(branch::context::context_entity& prev, branch::context::execution_wrapper& next)
+{
+    volatile context_entity* instack_prev = &prev;
+    volatile context_entity* instack_next = &next;
+    
+    internal::execute_to(prev, next);
+    context_load_cpu    (*prev)     ;
+}
+
+void branch::context::internal::switch_to(branch::context::context_entity& prev, branch::context::context_entity& next)
+{
+    context_store_cpu  (prev); // Store Previous CPU Context.
+    context_store_stack(prev);
+    
+    context_switch_to  (next);
+}
+
+void branch::context          ::switch_to(branch::context::context_entity& prev, branch::context::context_entity& next)
+{
+    volatile context_entity* instack_prev = &prev;
+    volatile context_entity* instack_next = &next;
+    
+    internal::switch_to(prev, next);
+    context_load_cpu   (*prev)     ;
+    
 }

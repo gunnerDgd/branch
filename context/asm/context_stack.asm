@@ -4,9 +4,6 @@
 global context_store_stack:function
 global context_load_stack:function
 
-section .data
-    
-
 section .text
 
 ; void context_store_stack(branch::context::execution_stack&)
@@ -26,9 +23,9 @@ context_store_stack:
 ; Uses RDI Register to Save Return Address.
 
 context_load_stack:
-    mov  rsi, qword[rsp]
+    mov  rax, qword[rsp]
     
     mov  rbp, qword[rdi]
     mov  rsp, qword[rdi + 0x08]
 
-    jmp  rsi
+    jmp  rax

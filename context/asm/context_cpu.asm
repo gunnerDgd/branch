@@ -1,12 +1,13 @@
 ; Built in NASM Environment.
 ; Store / Load CPU Context (Register) of the Function Frame.
 
-global store_cpu_context:function
-global load_cpu_context:function
+global context_store_cpu:function
+global context_load_cpu:function
 
 section .text
 
 ; void context_store_cpu(branch::context::execution_context&)
+; Exported at C Style Mangling.
 ; By System V Function Convention, RDI Register will be used to store parameter.
 
 context_store_cpu:
@@ -21,16 +22,17 @@ context_store_cpu:
     mov qword[rdi + 0x28], rdi
 
     mov [rsp]            , rax
-    mov rax              , qword[rbp + 0x08]
+    mov rax              , qword[rbp + 0x08] ; Stores RIP Register.
 
     mov qword[rdi + 0x30], rax
-    mov rax              , [rsp]
+    mov rax              , qword[rsp]
 
     add rsp              , 0x08
     ret
 
 
 ; void context_load_cpu(branch::context::execution_context&)
+; Exported at C Style Mangling.
 ; By System V Function Convention, RDI Register will be used to store parameter.
 
 context_load_cpu:
