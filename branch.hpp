@@ -1,10 +1,7 @@
-#include <branch/context/header/context.hpp>
+#include <branch/scheduler/scheduler.hpp>
 #include <tuple>
-#include <any>
 
-    static thread_local branch::context::context_entity* current_context;
-namespace branch     {
-    enum  state_code { standby, running, finished };
+namespace branch {
 
     template <typename T>
     class branch { };
@@ -13,31 +10,26 @@ namespace branch     {
     class branch<R(Args...)> : public context::execution_wrapper
     {
     public:
-        branch(R(*branch_exec)(Args...), Args... branch_args)
-            : branch_executor(branch_exec)                    ,
-              branch_state   (state_code::standby)            ,
-              branch_argument(std::make_tuple(branch_args...)),
-              branch_caller  (current_context)                { }
-
-        void operator() (context::context_entity& next)
-        {
-            context::context_entity* prev = current_context;
-            current_context               = &next          ;
-
-            if(branch_state == state_code::standby) {
-                branch_state = state_code::running;
-                context::execute_to(*this, next);
-            }
-            else
-                context::switch_to (*this, next);
-        }
+        branch(R(*br_exec)(Args...), Args... br_args);
+        branch(R(*br_exec)(Args...), Args... br_args, scheduler& br_sched);
 
     protected:
-        R                 (*branch_executor)(Args...);
-        std::tuple<Args...> branch_argument          ;
+        std::tuple<Args...> branch_argument                 ;
+        R                 (*branch_executor)(Args...)       ;
+        scheduler          *branch_scheduler       = nullptr;
 
-    protected:
-        state_code               branch_state ;
-        void                     execute()    { std::apply(branch_executor, branch_argument); }
+    private:
+        void execute      () override             { std::apply(branch_executor, branch_argument); }
     };
 }
+
+template <typename R, typename... Args>
+branch::branch<R(Args...)>::branch(R(*br_exec)(Args...), Args... br_args)
+    : branch_argument (std::make_tuple(br_args...)),
+      branch_executor (br_exec)                    {  }
+
+template <typename R, typename... Args>
+branch::branch<R(Args...)>::branch(R(*br_exec)(Args...), Args... br_args, scheduler& br_sched)
+    : branch_argument (std::make_tuple(br_args...)),
+      branch_executor (br_exec)                    ,
+      branch_scheduler(&br_sched)                  {  }

@@ -35,11 +35,6 @@ namespace context {
         frame        stack_context; // 16
     };
 
-    class execution_wrapper : public context_entity
-    {
-    public: 
-        virtual void execute() = 0;
-    };
-    
+    class execution_wrapper : public context_entity { public: virtual void execute() = 0; };
 }
 }
