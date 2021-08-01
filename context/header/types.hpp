@@ -35,6 +35,22 @@ namespace context {
         frame        stack_context; // 16
     };
 
-    class execution_wrapper : public context_entity { public: virtual void execute() = 0; };
+    enum  execution_state
+    {
+        standby,
+        running,
+        stopped
+    };
+
+    class execution_wrapper : public context_entity 
+    {
+    public:
+        execution_state get_state () { return executor_state; }
+        virtual void    execute   ()                   = 0;
+        virtual void    operator()(execution_wrapper&) = 0;
+
+    protected:
+        execution_state executor_state;
+    };
 }
 }

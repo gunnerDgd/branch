@@ -1,4 +1,5 @@
-#include <branch/scheduler/scheduler.hpp>
+#include <branch/context/header/context.hpp>
+#include <memory/vmem/vmem.hpp>
 #include <tuple>
 
 namespace branch {
@@ -6,30 +7,72 @@ namespace branch {
     template <typename T>
     class branch { };
     
+    template <>
+    class branch<>           : public context::execution_wrapper // Capture Current Branch.
+    {
+    public:
+        branch() { executor_state = execution_state::running; }
+    
+    protected:
+        void execute   ()                   override { }
+        void operator()(execution_wrapper&) override;
+    };
+
     template <typename R, typename... Args>
-    class branch<R(Args...)> : public context::execution_wrapper
+    class branch<R(Args...)> : public context::execution_wrapper, private memory::vmem
     {
     public:
         branch(R(*br_exec)(Args...), Args... br_args);
-        branch(R(*br_exec)(Args...), Args... br_args, scheduler& br_sched);
 
     protected:
         std::tuple<Args...> branch_argument                 ;
         R                 (*branch_executor)(Args...)       ;
-        scheduler          *branch_scheduler       = nullptr;
 
-    private:
-        void execute      () override             { std::apply(branch_executor, branch_argument); }
+    protected:
+        void execute   ()                   override;
+        void operator()(execution_wrapper&) override;
     };
 }
 
 template <typename R, typename... Args>
 branch::branch<R(Args...)>::branch(R(*br_exec)(Args...), Args... br_args)
-    : branch_argument (std::make_tuple(br_args...)),
-      branch_executor (br_exec)                    {  }
+    : vmem              (::memory::protect_type::read  | 
+                         ::memory::protect_type::write | 
+                         ::memory::protect_type::execute),
+      branch_argument   (std::make_tuple(br_args...))    ,
+      branch_executor   (br_exec)                    
+{
+    stack_context.rsp = reinterpret_cast<uint64_t>(memory_address);
+    stack_context.rbp = reinterpret_cast<uint64_t>(memory_address);
+}
 
 template <typename R, typename... Args>
-branch::branch<R(Args...)>::branch(R(*br_exec)(Args...), Args... br_args, scheduler& br_sched)
-    : branch_argument (std::make_tuple(br_args...)),
-      branch_executor (br_exec)                    ,
-      branch_scheduler(&br_sched)                  {  }
+void branch::branch<R(Args...)>::execute()
+{
+    if(executor_state != context::execution_state::standby) return;
+
+    executor_state     = context::execution_state::running;
+    std::apply          (branch_executor, branch_argument);
+}
+
+template <typename R, typename... Args>
+void branch::branch<R(Args...)>::operator()(context::execution_wrapper& exec)
+{
+    if      (exec.get_state() == context::execution_state::standby)
+        context::execute_to(*this, exec);
+    else if (exec.get_state() == context::execution_state::running)
+        context::switch_to (*this, exec);
+    else
+        return;
+}
+
+template <>
+void branch::branch<>::operator() (context::execution_wrapper& exec)
+{
+    if      (exec.get_state() == context::execution_state::standby)
+        context::execute_to(*this, exec);
+    else if (exec.get_state() == context::execution_state::running)
+        context::switch_to (*this, exec);
+    else
+        return;
+}

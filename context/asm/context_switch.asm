@@ -1,6 +1,8 @@
-; void context_switch_to       (branch::context::context_entity& next)
-global context_switch:function
+%include "context_cpu.asm"
+%include "context_stack.asm"
 
+; void context_switch_to       (branch::context::context_entity& next)
+global context_switch_to:function
 
 section .text
 context_switch_to:
