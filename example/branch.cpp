@@ -4,7 +4,7 @@ void test_1();
 void test_2();
 
 branch::branch<void()> br_test_1(test_1), br_test_2(test_2);
-branch::branch<>       br_main;
+branch::branch<int()>  br_main;
 
 int main()
 {

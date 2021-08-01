@@ -7,15 +7,13 @@ namespace branch {
     template <typename T>
     class branch { };
     
-    template <>
-    class branch<>           : public context::execution_wrapper // Capture Current Branch.
+    class main_branch : public context::execution_wrapper
     {
     public:
-        branch() { executor_state = execution_state::running; }
-    
+        main_branch    () { executor_state = execution_state::running; }
+        void operator()(execution_wrapper&) override;
     protected:
         void execute   ()                   override { }
-        void operator()(execution_wrapper&) override;
     };
 
     template <typename R, typename... Args>
@@ -23,14 +21,13 @@ namespace branch {
     {
     public:
         branch(R(*br_exec)(Args...), Args... br_args);
+        void operator()(execution_wrapper&) override;
 
     protected:
         std::tuple<Args...> branch_argument                 ;
         R                 (*branch_executor)(Args...)       ;
-
     protected:
         void execute   ()                   override;
-        void operator()(execution_wrapper&) override;
     };
 }
 
@@ -66,13 +63,4 @@ void branch::branch<R(Args...)>::operator()(context::execution_wrapper& exec)
         return;
 }
 
-template <>
-void branch::branch<>::operator() (context::execution_wrapper& exec)
-{
-    if      (exec.get_state() == context::execution_state::standby)
-        context::execute_to(*this, exec);
-    else if (exec.get_state() == context::execution_state::running)
-        context::switch_to (*this, exec);
-    else
-        return;
-}
+void branch::main_branch::execute()
