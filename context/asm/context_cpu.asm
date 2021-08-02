@@ -21,7 +21,7 @@ context_store_cpu:
     mov qword[rdi + 0x20], rsi
     mov qword[rdi + 0x28], rdi
 
-    mov [rsp]            , rax
+    mov qword[rsp]       , rax
     mov rax              , qword[rbp + 0x08] ; Stores RIP Register.
 
     mov qword[rdi + 0x30], rax

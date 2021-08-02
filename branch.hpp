@@ -4,13 +4,14 @@
 
 namespace branch {
 
-    template <typename T>
+    template <typename T = void>
     class branch { };
     
-    class main_branch : public context::execution_wrapper
+    template <>
+    class branch<void> : public context::execution_wrapper // Capture Current Branch (Context)
     {
     public:
-        main_branch    () { executor_state = execution_state::running; }
+        branch         ()                            { executor_state = context::execution_state::running; }
         void operator()(execution_wrapper&) override;
     protected:
         void execute   ()                   override { }
@@ -39,8 +40,8 @@ branch::branch<R(Args...)>::branch(R(*br_exec)(Args...), Args... br_args)
       branch_argument   (std::make_tuple(br_args...))    ,
       branch_executor   (br_exec)                    
 {
-    stack_context.rsp = reinterpret_cast<uint64_t>(memory_address);
-    stack_context.rbp = reinterpret_cast<uint64_t>(memory_address);
+    stack_context.rsp = reinterpret_cast<uint64_t>(memory_address) + memory_block_size;
+    stack_context.rbp = stack_context.rbp;
 }
 
 template <typename R, typename... Args>
@@ -63,4 +64,12 @@ void branch::branch<R(Args...)>::operator()(context::execution_wrapper& exec)
         return;
 }
 
-void branch::main_branch::execute()
+void branch::branch<void>::operator()(execution_wrapper& exec)
+{
+    if      (exec.get_state() == context::execution_state::standby)
+        context::execute_to(*this, exec);
+    else if (exec.get_state() == context::execution_state::running)
+        context::switch_to (*this, exec);
+    else
+        return;
+}

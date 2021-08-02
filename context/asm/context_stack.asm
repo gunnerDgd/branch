@@ -14,9 +14,10 @@ context_store_stack:
     mov  rax              , qword[rbp]
     mov  qword[rdi]       , rax
 
+    mov  rax              , rbp
     add  rax              , 0x10
-    mov  qword[rdi + 0x08], rax
 
+    mov  qword[rdi + 0x08], rax
     pop  rax
     ret
 
@@ -25,8 +26,6 @@ context_store_stack:
 
 context_load_stack:
     mov  rax, qword[rsp]
-    
-    mov  rbp, qword[rdi]
     mov  rsp, qword[rdi + 0x08]
 
     jmp  rax

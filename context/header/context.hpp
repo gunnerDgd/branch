@@ -1,4 +1,6 @@
 #include <branch/context/header/types.hpp>
+
+#include <cstring>
 #include <tuple>
 
 extern "C"
@@ -17,8 +19,8 @@ namespace branch   {
 namespace context  {
 
 namespace internal {
-    void switch_to (branch::context::context_entity& prev, branch::context::context_entity& next);
-    void execute_to(branch::context::context_entity& prev, execution_wrapper              & next);
+    void switch_to (branch::context::context_entity& prev, branch::context::context_entity& next); // Switch to Other Branch Context.
+    void execute_to(branch::context::context_entity& prev, execution_wrapper              & next); // Execute New Branch Context.
 }
 
     void switch_to (branch::context::context_entity& prev, branch::context::context_entity& next);
@@ -28,9 +30,11 @@ namespace internal {
 
 void branch::context::internal::execute_to(branch::context::context_entity& prev, execution_wrapper& next)
 {
-    context_store_cpu (prev.cpu_context)  ;
-    context_load_stack(next.stack_context);
-    next          .execute();
+    context_store_cpu  (prev.cpu_context)  ;
+    context_store_stack(prev.stack_context);
+
+    context_load_stack (next.stack_context); // RDI : next.stack_context.
+    next       .execute();                   // RDI : next.
 }
 
 void branch::context          ::execute_to(branch::context::context_entity& prev, execution_wrapper& next)
@@ -47,7 +51,7 @@ void branch::context::internal::switch_to(branch::context::context_entity& prev,
     context_store_cpu  (prev.cpu_context)  ; // Store Previous CPU Context.
     context_store_stack(prev.stack_context);
     
-    context_switch_to  (next);
+    context_switch_to  (next);               // Restore Stack Context and Instruction Pointer.
 }
 
 void branch::context          ::switch_to(branch::context::context_entity& prev, branch::context::context_entity& next)
