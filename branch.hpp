@@ -12,7 +12,7 @@ namespace branch {
     {
     public:
         branch         ()                            { executor_state = context::execution_state::running; }
-        void operator()(execution_wrapper&) override;
+        void operator()(execution_wrapper&)          ;
     protected:
         void execute   ()                   override { }
     };
@@ -22,7 +22,7 @@ namespace branch {
     {
     public:
         branch(R(*br_exec)(Args...), Args... br_args);
-        void operator()(execution_wrapper&) override;
+        void operator()(execution_wrapper&)          ;
 
     protected:
         std::tuple<Args...> branch_argument                 ;

@@ -47,7 +47,6 @@ namespace context {
     public:
         execution_state get_state () { return executor_state; }
         virtual void    execute   ()                   = 0;
-        virtual void    operator()(execution_wrapper&) = 0;
 
     protected:
         execution_state executor_state;
