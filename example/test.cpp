@@ -1,18 +1,15 @@
-#include <branch/branch.hpp>
+#include <branch/coroutine.hpp>
 
-void test(branch::branch<>& current_branch, branch::branch<>& main_branch)
+void test(coroutine::coroutine<>& main)
 {
-    std::cout << "Hello World\n";
-    current_branch(main_branch);
-    std::cout << "Hello World 2\n";
-    current_branch(main_branch);
+    std::cout << "Test\n";
+    main(3);
+    std::cout << "Test 2\n";
 }
 
 int main()
 {
-    branch::branch<> main_branch, test_branch(main_branch, test, main_branch);
-    
-    std::cout << "Hello World!!\n";
-    main_branch(test_branch);
-    std::cout << "Hello World!! 2\n";
-} 
+    std::cout << "Main\n";
+    coroutine::coroutine<> main(test);
+    std::cout << main.get_yield_value<int>() << std::endl;
+}
